@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { createListingSchema } from "@/lib/validations";
 import { generateSlug } from "@/lib/slug";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 
-    // find the internal user by Clerk ID
+    // find the internal user by Supabase Auth ID
     const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
+      where: { supabaseId: authUser.id },
     });
     if (!user || (user.role !== "SELLER" && user.role !== "ADMIN")) {
       return NextResponse.json({ error: "forbidden — seller role required" }, { status: 403 });
