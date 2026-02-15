@@ -1,0 +1,47 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
+export function SiteHeader() {
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border-subtle bg-canvas/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+        {/* logo / wordmark */}
+        <Link href="/" className="font-heading text-xl tracking-tight text-primary">
+          curated objects
+        </Link>
+
+        {/* navigation */}
+        <nav className="hidden items-center gap-8 md:flex">
+          <Link
+            href="/search"
+            className="text-sm text-secondary hover:text-primary"
+          >
+            browse
+          </Link>
+          <Link
+            href="/collections"
+            className="text-sm text-secondary hover:text-primary"
+          >
+            collections
+          </Link>
+          <Link
+            href="/about"
+            className="text-sm text-secondary hover:text-primary"
+          >
+            about
+          </Link>
+        </nav>
+
+        {/* actions */}
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm">
+            sign in
+          </Button>
+          <Button variant="default" size="sm">
+            sell
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}

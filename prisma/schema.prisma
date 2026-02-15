@@ -1,0 +1,117 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+// ──────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum ItemType {
+  DIRECT
+  AGGREGATED
+}
+
+enum ItemStatus {
+  AVAILABLE
+  SOLD
+  HIDDEN
+}
+
+// ──────────────────────────────────────────────
+// Models
+// ──────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  clerkId   String   @unique @map("clerk_id")
+  email     String
+  role      UserRole @default(BUYER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // relations
+  items       Item[]
+  collections Collection[]
+  favorites   Favorite[]
+
+  @@map("users")
+}
+
+model Item {
+  id          String     @id @default(uuid()) @db.Uuid
+  title       String
+  description String?    @db.Text
+  price       Int        // stored in cents
+  currency    String     @default("USD")
+  type        ItemType
+  status      ItemStatus @default(AVAILABLE)
+  sourceUrl   String?    @map("source_url")
+  vendorName  String?    @map("vendor_name")
+  images      String[]
+  tags        String[]
+  embedding   Unsupported("vector(1536)")?
+  slug        String     @unique
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // relations
+  sellerId    String     @map("seller_id") @db.Uuid
+  seller      User       @relation(fields: [sellerId], references: [id])
+  collections CollectionItem[]
+  favorites   Favorite[]
+
+  @@index([type, status])
+  @@index([sellerId])
+  @@map("items")
+}
+
+model Collection {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // relations
+  curatorId String           @map("curator_id") @db.Uuid
+  curator   User             @relation(fields: [curatorId], references: [id])
+  items     CollectionItem[]
+
+  @@map("collections")
+}
+
+model CollectionItem {
+  collectionId String @map("collection_id") @db.Uuid
+  itemId       String @map("item_id") @db.Uuid
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  item       Item       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, itemId])
+  @@map("collection_items")
+}
+
+model Favorite {
+  userId    String   @map("user_id") @db.Uuid
+  itemId    String   @map("item_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([userId, itemId])
+  @@map("favorites")
+}
