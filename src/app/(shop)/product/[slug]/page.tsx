@@ -1,25 +1,24 @@
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
+import { prisma } from "@/lib/db";
 
-// placeholder — will be fetched from DB via Prisma
-const PLACEHOLDER_PRODUCT = {
-  id: "1",
-  title: "mid-century walnut credenza",
-  description:
-    "beautifully restored mid-century modern credenza in solid walnut. features three sliding doors with original brass hardware, adjustable interior shelving, and tapered legs. minor patina consistent with age adds to its authentic character.",
-  price: 185000,
-  currency: "USD",
-  type: "DIRECT" as const,
-  status: "AVAILABLE" as const,
-  images: [],
-  tags: ["mid-century", "walnut", "credenza", "storage", "vintage"],
-  vendorName: null,
-  sourceUrl: null,
-};
+export default async function ProductPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
 
-export default function ProductPage() {
-  const product = PLACEHOLDER_PRODUCT;
+  const product = await prisma.item.findUnique({
+    where: { slug },
+    include: { seller: { select: { id: true, email: true } } },
+  });
+
+  if (!product || product.status !== "AVAILABLE") {
+    notFound();
+  }
 
   return (
     <div className="grid gap-12 lg:grid-cols-2">
@@ -51,21 +50,25 @@ export default function ProductPage() {
           </p>
         </div>
 
-        <p className="leading-relaxed text-secondary">
-          {product.description}
-        </p>
+        {product.description && (
+          <p className="leading-relaxed text-secondary">
+            {product.description}
+          </p>
+        )}
 
         {/* tags */}
-        <div className="flex flex-wrap gap-2">
-          {product.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full border border-border-subtle px-3 py-1 text-xs text-secondary lowercase"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        {product.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {product.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-border-subtle px-3 py-1 text-xs text-secondary lowercase"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* action buttons */}
         <div className="mt-auto flex flex-col gap-3 pt-6 sm:flex-row">

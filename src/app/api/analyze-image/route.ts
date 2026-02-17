@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // analyze the image with GPT-4o-mini vision
+    // analyze the image with Gemini 2.0 Flash vision
     const analysis = await analyzeImage(imageUrl);
 
     // generate an embedding from the description for vector search

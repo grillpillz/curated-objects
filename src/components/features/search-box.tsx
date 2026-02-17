@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -42,18 +43,35 @@ type SearchBoxProps = {
 };
 
 export function SearchBox({ onSearch, onImageUpload, className }: SearchBoxProps) {
+  const router = useRouter();
   const [query, setQuery] = React.useState("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const debounceRef = React.useRef<ReturnType<typeof setTimeout>>(null);
+
+  function handleSearch(value: string) {
+    if (onSearch) {
+      onSearch(value);
+    } else {
+      router.push(`/search?q=${encodeURIComponent(value)}`);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      handleSearch(query);
+    }
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     setQuery(value);
 
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      onSearch?.(value);
-    }, 300);
+    if (onSearch) {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        onSearch(value);
+      }, 300);
+    }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -67,6 +85,7 @@ export function SearchBox({ onSearch, onImageUpload, className }: SearchBoxProps
       <Input
         value={query}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
         placeholder="describe what you're looking for..."
         className="pl-13 pr-13 h-14 text-base rounded-full"
       />

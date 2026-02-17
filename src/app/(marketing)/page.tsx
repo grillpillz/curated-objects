@@ -3,14 +3,14 @@ import { ProductCard } from "@/components/features/product-card";
 
 const PLACEHOLDER_ITEMS = [
   {
-    id: "1",
+    slug: "mid-century-walnut-credenza",
     title: "mid-century walnut credenza",
     price: 185000,
     images: [],
     type: "DIRECT" as const,
   },
   {
-    id: "2",
+    slug: "brass-arc-floor-lamp",
     title: "brass arc floor lamp",
     price: 42000,
     images: [],
@@ -18,14 +18,14 @@ const PLACEHOLDER_ITEMS = [
     type: "AGGREGATED" as const,
   },
   {
-    id: "3",
+    slug: "hand-thrown-ceramic-vase",
     title: "hand-thrown ceramic vase",
     price: 8500,
     images: [],
     type: "DIRECT" as const,
   },
   {
-    id: "4",
+    slug: "vintage-kilim-pillow-set",
     title: "vintage kilim pillow set",
     price: 12000,
     images: [],
@@ -33,14 +33,14 @@ const PLACEHOLDER_ITEMS = [
     type: "AGGREGATED" as const,
   },
   {
-    id: "5",
+    slug: "teak-nesting-tables",
     title: "teak nesting tables",
     price: 34000,
     images: [],
     type: "DIRECT" as const,
   },
   {
-    id: "6",
+    slug: "art-deco-vanity-mirror",
     title: "art deco vanity mirror",
     price: 22500,
     images: [],
@@ -69,7 +69,7 @@ export default function HomePage() {
         <h2 className="mb-8 text-2xl">trending now</h2>
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {PLACEHOLDER_ITEMS.map((item) => (
-            <ProductCard key={item.id} {...item} />
+            <ProductCard key={item.slug} {...item} />
           ))}
         </div>
       </section>

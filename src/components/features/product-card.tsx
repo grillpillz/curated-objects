@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cn, formatCurrency } from "@/lib/utils";
 
 type ProductCardProps = {
-  id: string;
+  slug: string;
   title: string;
   price: number;
   currency?: string;
@@ -15,7 +15,7 @@ type ProductCardProps = {
 };
 
 export function ProductCard({
-  id,
+  slug,
   title,
   price,
   currency = "USD",
@@ -24,7 +24,7 @@ export function ProductCard({
   type,
   className,
 }: ProductCardProps) {
-  const href = type === "DIRECT" ? `/product/${id}` : undefined;
+  const href = type === "DIRECT" ? `/product/${slug}` : undefined;
 
   const content = (
     <div
