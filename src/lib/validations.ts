@@ -23,5 +23,19 @@ export const searchSchema = z.object({
   limit: z.number().int().positive().max(50).default(20),
 });
 
+export const createCrawlSourceSchema = z.object({
+  vendorName: z.string().min(1).max(100),
+  baseUrl: z.string().url(),
+  searchTerms: z.array(z.string().min(1)).min(1).max(50),
+  strategy: z.enum(["api", "html"]).default("api"),
+  config: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const updateCrawlSourceSchema = createCrawlSourceSchema.partial().extend({
+  status: z.enum(["ACTIVE", "PAUSED", "ERROR"]).optional(),
+});
+
 export type CreateListingInput = z.infer<typeof createListingSchema>;
 export type SearchInput = z.infer<typeof searchSchema>;
+export type CreateCrawlSourceInput = z.infer<typeof createCrawlSourceSchema>;
+export type UpdateCrawlSourceInput = z.infer<typeof updateCrawlSourceSchema>;

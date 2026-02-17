@@ -58,9 +58,10 @@ model Item {
   currency    String     @default("USD")
   type        ItemType
   status      ItemStatus @default(AVAILABLE)
-  sourceUrl   String?    @map("source_url")
-  vendorName  String?    @map("vendor_name")
-  images      String[]
+  sourceUrl    String?    @map("source_url")
+  vendorName   String?    @map("vendor_name")
+  sourceItemId String?    @unique @map("source_item_id") // e.g. "etsy:12345" for dedup
+  images       String[]
   tags        String[]
   embedding   Unsupported("vector(768)")?
   slug        String     @unique
@@ -102,6 +103,58 @@ model CollectionItem {
 
   @@id([collectionId, itemId])
   @@map("collection_items")
+}
+
+// ──────────────────────────────────────────────
+// Crawler
+// ──────────────────────────────────────────────
+
+enum CrawlSourceStatus {
+  ACTIVE
+  PAUSED
+  ERROR
+}
+
+enum CrawlRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model CrawlSource {
+  id          String            @id @default(uuid()) @db.Uuid
+  vendorName  String            @map("vendor_name")
+  baseUrl     String            @map("base_url")
+  searchTerms String[]          @map("search_terms")
+  strategy    String            @default("api") // "api" | "html"
+  config      Json?
+  status      CrawlSourceStatus @default(ACTIVE)
+  lastCrawlAt DateTime?         @map("last_crawl_at")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  runs CrawlRun[]
+
+  @@map("crawl_sources")
+}
+
+model CrawlRun {
+  id           String         @id @default(uuid()) @db.Uuid
+  sourceId     String         @map("source_id") @db.Uuid
+  source       CrawlSource    @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  status       CrawlRunStatus @default(PENDING)
+  itemsFound   Int            @default(0) @map("items_found")
+  itemsCreated Int            @default(0) @map("items_created")
+  itemsSkipped Int            @default(0) @map("items_skipped")
+  errorMessage String?        @map("error_message") @db.Text
+  startedAt    DateTime?      @map("started_at")
+  completedAt  DateTime?      @map("completed_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  @@index([sourceId])
+  @@index([status])
+  @@map("crawl_runs")
 }
 
 model Favorite {

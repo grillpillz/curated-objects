@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 import { SearchBox } from "@/components/features/search-box";
 import { ProductCard } from "@/components/features/product-card";
+import { WebResultCard } from "@/components/features/web-result-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { prisma } from "@/lib/db";
 import { generateEmbedding } from "@/lib/ai";
+import { fetchWebSearchResults } from "@/lib/web-search";
 
 function ResultsSkeleton() {
   return (
@@ -84,7 +86,14 @@ async function SearchResults({ query }: { query?: string }) {
     );
   }
 
-  if (items.length === 0) {
+  // Fetch web results when local results are sparse
+  const LOCAL_RESULT_THRESHOLD = 5;
+  const webResults =
+    items.length < LOCAL_RESULT_THRESHOLD
+      ? await fetchWebSearchResults(query)
+      : [];
+
+  if (items.length === 0 && webResults.length === 0) {
     return (
       <p className="py-20 text-center text-secondary">
         no results found for &ldquo;{query}&rdquo;
@@ -92,22 +101,84 @@ async function SearchResults({ query }: { query?: string }) {
     );
   }
 
+  // Background-index web results for future searches
+  if (webResults.length > 0) {
+    const baseUrl =
+      process.env.NEXT_PUBLIC_VERCEL_URL
+        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+        : "http://localhost:3000";
+
+    fetch(`${baseUrl}/api/cron/crawl/ingest`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.CRON_SECRET ?? ""}`,
+      },
+      body: JSON.stringify({
+        items: webResults.map((r) => ({
+          externalId: r.url,
+          title: r.title,
+          description: r.snippet,
+          price: 0,
+          currency: "USD",
+          imageUrls: r.thumbnail ? [r.thumbnail] : [],
+          sourceUrl: r.url,
+          vendorName: r.source,
+        })),
+      }),
+    }).catch(() => {
+      // fire-and-forget — don't block the response
+    });
+  }
+
   return (
-    <div className="columns-2 gap-6 sm:columns-3 lg:columns-4">
-      {items.map((item) => (
-        <div key={item.id} className="mb-6 break-inside-avoid">
-          <ProductCard
-            slug={item.slug}
-            title={item.title}
-            price={item.price}
-            currency={item.currency}
-            images={item.images}
-            vendorName={item.vendorName}
-            sourceUrl={item.sourceUrl}
-            type={item.type}
-          />
+    <div className="space-y-12">
+      {/* Local results */}
+      {items.length > 0 && (
+        <div className="columns-2 gap-6 sm:columns-3 lg:columns-4">
+          {items.map((item) => (
+            <div key={item.id} className="mb-6 break-inside-avoid">
+              <ProductCard
+                slug={item.slug}
+                title={item.title}
+                price={item.price}
+                currency={item.currency}
+                images={item.images}
+                vendorName={item.vendorName}
+                sourceUrl={item.sourceUrl}
+                type={item.type}
+              />
+            </div>
+          ))}
         </div>
-      ))}
+      )}
+
+      {/* Web results */}
+      {webResults.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="h-px flex-1 bg-border-subtle" />
+            <span className="text-xs text-secondary">
+              also found across the web
+            </span>
+            <div className="h-px flex-1 bg-border-subtle" />
+          </div>
+
+          <div className="columns-2 gap-6 sm:columns-3 lg:columns-4">
+            {webResults.map((result) => (
+              <div key={result.url} className="mb-6 break-inside-avoid">
+                <WebResultCard
+                  title={result.title}
+                  url={result.url}
+                  snippet={result.snippet}
+                  thumbnail={result.thumbnail}
+                  source={result.source}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
