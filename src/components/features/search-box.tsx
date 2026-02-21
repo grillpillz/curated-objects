@@ -37,14 +37,15 @@ function UploadIcon({ className }: { className?: string }) {
 }
 
 type SearchBoxProps = {
+  defaultValue?: string;
   onSearch?: (query: string) => void;
   onImageUpload?: (file: File) => void;
   className?: string;
 };
 
-export function SearchBox({ onSearch, onImageUpload, className }: SearchBoxProps) {
+export function SearchBox({ defaultValue = "", onSearch, onImageUpload, className }: SearchBoxProps) {
   const router = useRouter();
-  const [query, setQuery] = React.useState("");
+  const [query, setQuery] = React.useState(defaultValue);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const debounceRef = React.useRef<ReturnType<typeof setTimeout>>(null);
 
@@ -87,7 +88,7 @@ export function SearchBox({ onSearch, onImageUpload, className }: SearchBoxProps
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder="describe what you're looking for..."
-        className="pl-13 pr-13 h-14 text-base rounded-full"
+        className="pl-12 pr-12 h-14 text-base rounded-full"
       />
       <button
         type="button"

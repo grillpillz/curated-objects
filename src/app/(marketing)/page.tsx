@@ -1,52 +1,21 @@
+import Link from "next/link";
 import { SearchBox } from "@/components/features/search-box";
-import { ProductCard } from "@/components/features/product-card";
 
-const PLACEHOLDER_ITEMS = [
-  {
-    slug: "mid-century-walnut-credenza",
-    title: "mid-century walnut credenza",
-    price: 185000,
-    images: [],
-    type: "DIRECT" as const,
-  },
-  {
-    slug: "brass-arc-floor-lamp",
-    title: "brass arc floor lamp",
-    price: 42000,
-    images: [],
-    vendorName: "etsy",
-    type: "AGGREGATED" as const,
-  },
-  {
-    slug: "hand-thrown-ceramic-vase",
-    title: "hand-thrown ceramic vase",
-    price: 8500,
-    images: [],
-    type: "DIRECT" as const,
-  },
-  {
-    slug: "vintage-kilim-pillow-set",
-    title: "vintage kilim pillow set",
-    price: 12000,
-    images: [],
-    vendorName: "chairish",
-    type: "AGGREGATED" as const,
-  },
-  {
-    slug: "teak-nesting-tables",
-    title: "teak nesting tables",
-    price: 34000,
-    images: [],
-    type: "DIRECT" as const,
-  },
-  {
-    slug: "art-deco-vanity-mirror",
-    title: "art deco vanity mirror",
-    price: 22500,
-    images: [],
-    vendorName: "1stdibs",
-    type: "AGGREGATED" as const,
-  },
+const TRENDING_SEARCHES = [
+  "mid century modern furniture",
+  "vintage brass lighting",
+  "antique ceramic vases",
+  "art deco barware",
+  "bohemian textiles",
+  "scandinavian design",
+  "vintage palm tree lamp",
+  "rattan peacock chair",
+];
+
+const COLLECTIONS = [
+  { label: "scandinavian minimal", query: "scandinavian minimal vintage furniture" },
+  { label: "art deco revival", query: "art deco vintage home decor" },
+  { label: "japanese wabi-sabi", query: "japanese wabi sabi pottery ceramics" },
 ];
 
 export default function HomePage() {
@@ -64,31 +33,36 @@ export default function HomePage() {
         <SearchBox />
       </section>
 
-      {/* trending section */}
+      {/* trending searches */}
       <section className="mx-auto w-full max-w-7xl px-6 pb-20">
-        <h2 className="mb-8 text-2xl">trending now</h2>
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-          {PLACEHOLDER_ITEMS.map((item) => (
-            <ProductCard key={item.slug} {...item} />
+        <h2 className="mb-8 text-2xl">popular searches</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {TRENDING_SEARCHES.map((term) => (
+            <Link
+              key={term}
+              href={`/search?q=${encodeURIComponent(term)}`}
+              className="flex items-center rounded-xl border border-border-subtle px-5 py-4 text-sm text-secondary transition-all duration-200 hover:border-primary hover:text-primary"
+            >
+              {term}
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* collections preview */}
+      {/* curated collections */}
       <section className="border-t border-border-subtle py-20">
         <div className="mx-auto max-w-7xl px-6">
-          <h2 className="mb-8 text-2xl">curated collections</h2>
+          <h2 className="mb-8 text-2xl">browse by style</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {["scandinavian minimal", "art deco revival", "japanese wabi-sabi"].map(
-              (collection) => (
-                <div
-                  key={collection}
-                  className="flex aspect-[4/3] items-end rounded-2xl border border-border-subtle bg-border-subtle/50 p-6 transition-all duration-300 hover:shadow-sm"
-                >
-                  <h3 className="text-xl">{collection}</h3>
-                </div>
-              ),
-            )}
+            {COLLECTIONS.map((collection) => (
+              <Link
+                key={collection.label}
+                href={`/search?q=${encodeURIComponent(collection.query)}`}
+                className="flex aspect-[4/3] items-end rounded-2xl border border-border-subtle bg-border-subtle/50 p-6 transition-all duration-300 hover:shadow-sm hover:border-primary"
+              >
+                <h3 className="text-xl">{collection.label}</h3>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -97,11 +71,6 @@ export default function HomePage() {
       <footer className="border-t border-border-subtle py-10">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 text-sm text-secondary md:flex-row md:justify-between">
           <p>&copy; 2026 curated objects</p>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-primary">terms</a>
-            <a href="#" className="hover:text-primary">privacy</a>
-            <a href="#" className="hover:text-primary">contact</a>
-          </div>
         </div>
       </footer>
     </div>

@@ -5,6 +5,7 @@ type WebResultCardProps = {
   title: string;
   url: string;
   snippet: string;
+  price?: string;
   thumbnail?: string;
   source: string;
   className?: string;
@@ -31,10 +32,16 @@ export function WebResultCard({
   title,
   url,
   snippet,
+  price,
   thumbnail,
   source,
   className,
 }: WebResultCardProps) {
+  // Build a favicon URL from the source domain for the no-preview fallback
+  const faviconUrl = source && source !== "web"
+    ? `https://www.google.com/s2/favicons?domain=${source}&sz=64`
+    : undefined;
+
   return (
     <a
       href={url}
@@ -57,8 +64,18 @@ export function WebResultCard({
             unoptimized
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-secondary">
-            no preview
+          <div className="flex h-full flex-col items-center justify-center gap-3">
+            {faviconUrl && (
+              <Image
+                src={faviconUrl}
+                alt={source}
+                width={32}
+                height={32}
+                className="opacity-40"
+                unoptimized
+              />
+            )}
+            <span className="text-xs text-secondary">no preview</span>
           </div>
         )}
       </div>
@@ -71,6 +88,9 @@ export function WebResultCard({
           </p>
           <ExternalLinkIcon className="mt-0.5 shrink-0 text-secondary" />
         </div>
+        {price && (
+          <p className="text-sm font-medium text-primary">{price}</p>
+        )}
         <p className="flex items-center gap-1 text-xs text-secondary lowercase">
           via {source}
         </p>

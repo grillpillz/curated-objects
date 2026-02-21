@@ -140,14 +140,6 @@ export default function NewListingPage() {
               />
             </div>
 
-            {/* image upload placeholder */}
-            <div className="space-y-2">
-              <label className="text-sm text-secondary">images</label>
-              <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-border-subtle text-sm text-secondary">
-                drag & drop images here (coming soon)
-              </div>
-            </div>
-
             {error && (
               <p className="text-sm text-red-500">{error}</p>
             )}

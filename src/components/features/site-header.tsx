@@ -23,18 +23,6 @@ export async function SiteHeader() {
           >
             browse
           </Link>
-          <Link
-            href="/collections"
-            className="text-sm text-secondary hover:text-primary"
-          >
-            collections
-          </Link>
-          <Link
-            href="/about"
-            className="text-sm text-secondary hover:text-primary"
-          >
-            about
-          </Link>
         </nav>
 
         {/* actions */}
